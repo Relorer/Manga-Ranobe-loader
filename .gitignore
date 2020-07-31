@@ -2,3 +2,7 @@
 /build
 main.spec
 /src/__pycache__
+**.pdf
+**.jpg
+**.png
+**.gif
