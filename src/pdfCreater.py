@@ -4,14 +4,30 @@ from io import BytesIO
 import os
 
 
-def create_manga_pdf(name, author, chapters):
-    pdf = FPDF()
-    pdf.set_font("Arial", size=12)
+def create_manga_pdf(name, author, chapters, sizeLimit=0):
+    currentSize = 0
+    numFiles = 0
+    pdf = create_pdf()
     for chapter in chapters:
+        if sizeLimit != 0 and currentSize != 0 and currentSize + chapter.size > sizeLimit:
+            pdf.output(name + "_" + ((str)(numFiles)) + ".pdf")
+            numFiles += 1
+            pdf = create_pdf()
+        else:
+            currentSize += chapter.size
         add_title(pdf, chapter.title)
         for page in chapter.pages:
             add_image(pdf, chapter.address + "\\" + page)
-    pdf.output(name + ".pdf")
+    if numFiles == 0:
+        pdf.output(name + ".pdf")
+    else:
+        pdf.output(name + "_" + ((str)(numFiles)) + ".pdf")
+
+
+def create_pdf():
+    pdf = FPDF()
+    pdf.set_font("Arial", size=12)
+    return pdf
 
 
 def add_image(pdf, imagePath):
