@@ -9,7 +9,7 @@ def get_сhapter(path):
             size = 0
             for file in files:
                 fp = os.path.join(address, file)
-                size += os.path.getsize(fp)
+                size += os.stat(fp).st_size
             chapter.append(
                 Chapter(address[address.rfind("\\") + 1:], address, files, size))
     return chapter
