@@ -3,24 +3,28 @@ from PIL import Image
 import os
 
 
-def create_manga_pdf(name, author, chapters, sizeLimit=0):
+def create_manga_pdf(name, author, chapters, sizeLimit, setProgress):
     currentSize = 0
     numFiles = 0
     pdf = create_pdf()
-    for chapter in chapters:
+    setProgress(0)
+    for index, chapter in enumerate(chapters):
         if sizeLimit != 0 and currentSize != 0 and currentSize + chapter.size > sizeLimit:
             pdf.output(name + "_" + ((str)(numFiles)) + ".pdf")
             numFiles += 1
             pdf = create_pdf()
+            currentSize = 0
         else:
             currentSize += chapter.size
         add_title(pdf, chapter.title)
         for page in chapter.pages:
             add_image(pdf, chapter.address + "\\" + page)
+        setProgress((index + 1) / len(chapters) * 75)
     if numFiles == 0:
         pdf.output(name + ".pdf")
     else:
         pdf.output(name + "_" + ((str)(numFiles)) + ".pdf")
+    setProgress(100)
 
 
 def create_pdf():
