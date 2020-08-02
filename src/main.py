@@ -9,4 +9,5 @@ def main():
     create_manga_pdf("filename", "author", chapters, sizeLimit)
 
 
-main()
+if __name__ == "__main__":
+    main()

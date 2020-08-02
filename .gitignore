@@ -7,3 +7,4 @@ main.spec
 **.png
 **.gif
 .cache
+.log
