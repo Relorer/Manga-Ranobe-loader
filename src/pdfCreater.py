@@ -3,32 +3,42 @@ from PIL import Image
 import os
 
 
-def create_manga_pdf(name, author, chapters, sizeLimit, setProgress):
+def create_manga_pdf(path, manga, sizeLimit, setProgress):
     currentSize = 0
     numFiles = 0
-    pdf = create_pdf()
+    pdf = create_pdf(manga.author)
     setProgress(0)
-    for index, chapter in enumerate(chapters):
+    if manga.coverLink != "":
+        add_image(pdf, os.path.join(path, manga.cover))
+
+    for ch in manga.chapters:
+        for p in ch.pages:
+            ch.size += os.path.getsize(os.path.join(path, p.title))
+            
+    for index, chapter in enumerate(manga.chapters):
         if sizeLimit != 0 and currentSize != 0 and currentSize + chapter.size > sizeLimit:
-            pdf.output(name + "_" + ((str)(numFiles)) + ".pdf")
+            pdf.output(manga.titleEN + "_" + ((str)(numFiles)) + ".pdf")
             numFiles += 1
-            pdf = create_pdf()
+            pdf = create_pdf(manga.author)
+            if manga.coverLink != "":
+                add_image(pdf, os.path.join(path, manga.cover))
             currentSize = 0
         else:
             currentSize += chapter.size
         add_title(pdf, chapter.title)
         for page in chapter.pages:
-            add_image(pdf, chapter.address + "\\" + page)
-        setProgress((index + 1) / len(chapters) * 75)
+            add_image(pdf, os.path.join(path, page.title))
+        setProgress((index + 1) / len(manga.chapters) * 75)
     if numFiles == 0:
-        pdf.output(name + ".pdf")
+        pdf.output(manga.titleEN + ".pdf")
     else:
-        pdf.output(name + "_" + ((str)(numFiles)) + ".pdf")
+        pdf.output(manga.titleEN + "_" + ((str)(numFiles)) + ".pdf")
     setProgress(100)
 
 
-def create_pdf():
+def create_pdf(author):
     pdf = FPDF()
+    pdf.set_author(author)
     pdf.set_font("Arial", size=12)
     return pdf
 

@@ -2,17 +2,26 @@ from colorama import init as coloramaInit
 from colorama import Fore, Style
 
 import time
+import shutil
 from console_progressbar import ProgressBar
 
-from folderReader import get_сhapter
+from mangaParser import get_manga
+from mangaLoader import download_manga
 from pdfCreater import create_manga_pdf
+
 
 coloramaInit()
 
+parsingProgressBar = ProgressBar(total=100, prefix='Parsing  ',
+                                 length=50, fill='X', zfill='-')
 loadingProgressBar = ProgressBar(total=100, prefix='Loading  ',
                                  length=50, fill='X', zfill='-')
 creationProgressBar = ProgressBar(total=100, prefix='Creating ',
                                   length=50, fill='X', zfill='-')
+
+
+def setProgressForParsing(progress):
+    parsingProgressBar.print_progress_bar(progress)
 
 
 def setProgressForLoading(progress):
@@ -24,22 +33,33 @@ def setProgressForCreation(progress):
 
 
 def main():
+    downloadPath = "download_manga"
     while True:
         print(Style.RESET_ALL, end="")
         print("Enter a link to the manga: ", end="")
-        path = input()
+        url = input()
         print("Enter the maximum PDF file size (MB): ", end="")
         try:
-            sizeLimit = (int)(input()) * 1024 * 1024
+            sizeLimit = abs((int)(input()) * 1024 * 1024)
         except:
             print(Fore.RED + "The size must be a number")
             continue
-        setProgressForLoading(0)
-        # download here
-        setProgressForLoading(100)
-        chapters = get_сhapter(path)
-        create_manga_pdf("filename", "author", chapters,
+        try:
+            manga = get_manga(url, setProgressForParsing)
+        except:
+            print(Fore.RED + "Invalid link, don't try to fuck up the system")
+            continue
+        try:
+            download_manga(downloadPath, manga, setProgressForLoading)
+        except:
+            print(Fore.BLUE + "Please install the Google Chrome browser in the default folder")
+            continue
+        try:
+            create_manga_pdf(downloadPath, manga,
                          sizeLimit, setProgressForCreation)
+        except:
+            input()
+        shutil.rmtree(downloadPath)
 
 
 if __name__ == "__main__":
