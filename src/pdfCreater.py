@@ -9,7 +9,7 @@ def create_manga_pdf(path, manga, sizeLimit, setProgress):
     pdf = create_pdf(manga.author)
     setProgress(0)
     if manga.coverLink != "":
-        add_image(pdf, os.path.join(path, manga.cover))
+        add_image_free(pdf, os.path.join(path, manga.cover))
 
     for ch in manga.chapters:
         for p in ch.pages:
@@ -21,13 +21,13 @@ def create_manga_pdf(path, manga, sizeLimit, setProgress):
             numFiles += 1
             pdf = create_pdf(manga.author)
             if manga.coverLink != "":
-                add_image(pdf, os.path.join(path, manga.cover))
+                add_image_free(pdf, os.path.join(path, manga.cover))
             currentSize = 0
         else:
             currentSize += chapter.size
         add_title(pdf, chapter.title)
         for page in chapter.pages:
-            add_image(pdf, os.path.join(path, page.title))
+            add_image_free(pdf, os.path.join(path, page.title))
         setProgress((index + 1) / len(manga.chapters) * 75)
     if numFiles == 0:
         pdf.output(manga.titleEN + ".pdf")
@@ -43,7 +43,7 @@ def create_pdf(author):
     return pdf
 
 
-def add_image(pdf, imagePath):
+def add_image_a4(pdf, imagePath):
     tempPath = imagePath + ".jpg"
     pdf.add_page()
     image = Image.open(imagePath)
@@ -60,6 +60,15 @@ def add_image(pdf, imagePath):
         pdf.image(tempPath, x=0, y=y, w=pdf.w)
     os.remove(tempPath)
 
+def add_image_free(pdf, imagePath):
+    tempPath = imagePath + ".jpg"
+    image = Image.open(imagePath)
+    jpg = image.convert("RGB")
+    jpg.save(tempPath)
+    (width, height) = image.size
+    pdf.add_page(format =(210, height / width * 210))
+    pdf.image(tempPath, x=0, y=0, h=pdf.h)
+    os.remove(tempPath)
 
 def add_title(pdf, title):
     pdf.add_page()
