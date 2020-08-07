@@ -52,13 +52,11 @@ def main():
         try:
             download_manga(downloadPath, manga, setProgressForLoading)
         except:
-            print(Fore.BLUE + "Please install the Google Chrome browser in the default folder")
+            print(
+                Fore.BLUE + "Please install the Google Chrome browser in the default folder")
             continue
-        try:
-            create_manga_pdf(downloadPath, manga,
+        create_manga_pdf(downloadPath, manga,
                          sizeLimit, setProgressForCreation)
-        except:
-            input()
         shutil.rmtree(downloadPath)
 
 
