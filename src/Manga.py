@@ -9,7 +9,8 @@ class Manga:
 
 
 class Chapter:
-    def __init__(self, title, pages, size = 0):
+    def __init__(self, number, title, pages, size = 0):
+        self.number = number
         self.title = title
         self.pages = pages
         self.size = size

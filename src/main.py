@@ -33,37 +33,90 @@ def setProgressForCreation(progress):
 
 
 def main():
-    urls = []
     downloadPath = "download_manga"
-    while True:
-        print(Style.RESET_ALL, end="")
+    try:
         while True:
-            print("Enter a link to the manga: ", end="")
-            url = input()
-            if url == "":
-                break
-            urls.append(url)
-        print("Enter the maximum PDF file size (MB): ", end="")
-        try:
-            sizeLimit = abs((int)(input()) * 1024 * 1024)
-        except:
-            print(Fore.RED + "The size must be a number")
-            continue
-        for url in urls:
-            try:
-                manga = get_manga(url, setProgressForParsing)
-            except:
-                print(Fore.RED + "Invalid link, don't try to fuck up the system")
-                continue
-            try:
-                download_manga(downloadPath, manga, setProgressForLoading)
-            except:
-                print(
-                    Fore.BLUE + "Please install the Google Chrome browser in the default folder")
-                continue
-            create_manga_pdf(downloadPath, manga,
-                            sizeLimit, setProgressForCreation)
-            shutil.rmtree(downloadPath)
+                urls = []
+                while True:
+                    print(Style.RESET_ALL, end="")
+                    print("Enter a link to the manga: ", end="")
+                    url = input()
+                    if url == "" and len(urls) > 0:
+                        break
+                    elif url == "":
+                        continue
+                    print(
+                        "Enter a range of chapters (end-to-end numbering from 1): ", end="")
+                    cut = [int(s) for s in input().split() if s.isdigit()]
+                    begin = end = 0
+                    if len(cut) == 1:
+                        begin = cut[0]
+                    elif len(cut) > 1:
+                        begin = cut[0]
+                        end = cut[1]
+                    if begin > end and end > 0: 
+                        temp = begin
+                        begin = end
+                        end = temp
+                    print("Fixed height (y/n): ", end="")
+                    fixedHeight = input()
+                    sizeLimit = 0
+                    while True:
+                        print(Style.RESET_ALL, end="")
+                        print("Enter the maximum PDF file size (MB): ", end="")
+                        try:
+                            size = input()
+                            if size == "":
+                                size = 0
+                            sizeLimit = abs((int)(size) * 1024 * 1024)
+                            break
+                        except:
+                            print(Fore.RED + "The size must be a number")
+                            continue
+                    urls.append((url, begin, end, fixedHeight == "y" or fixedHeight == "н", sizeLimit))
+
+                for url, begin, end, fixedHeight, sizeLimit in urls:
+                    print()
+                    print(Fore.BLUE + url)
+                    print(Style.RESET_ALL, end="")
+                    manga = {}
+                    try:
+                        manga = get_manga(url, setProgressForParsing, begin, end)
+
+                        if len(manga.chapters) == 0:
+                            print(
+                                Fore.RED + "The selected range does not include any chapters")
+                            continue
+
+                        while True:
+                            try:
+                                download_manga(downloadPath, manga,
+                                            setProgressForLoading)
+                                break
+                            except:
+                                print()
+                                print(Fore.RED + "An error occurred during loading")
+                                print(Fore.BLUE +
+                                      "Google Chrome is required for the program to work")
+                                print(Fore.WHITE + "Try again (y/n): ", end="")
+                                answer = input()
+                                if answer == "y" or answer == "н":
+                                    continue
+                                break
+
+                        create_manga_pdf(downloadPath, manga,
+                                        sizeLimit, fixedHeight, setProgressForCreation)
+                        shutil.rmtree(downloadPath)
+
+                        print(Fore.GREEN + "Finished: " + manga.title.strip())
+                    except:
+                        print()
+                        print(Fore.RED + "Invalid link")
+                        continue
+
+                print()
+    except:
+        shutil.rmtree(downloadPath)
 
 
 if __name__ == "__main__":
