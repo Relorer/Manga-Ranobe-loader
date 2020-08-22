@@ -13,7 +13,6 @@ class Chapter:
         self.number = number
         self.title = title
         self.pages = pages
-        self.size = size
 
 
 class Page:
