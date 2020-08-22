@@ -1,6 +1,8 @@
 {
     "python.linting.enabled": true,
     "cSpell.words": [
+        "Epub",
+        "Ranobe",
         "rfind"
     ]
 }
