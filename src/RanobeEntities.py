@@ -1,4 +1,4 @@
-class Manga:
+class Ranobe:
     def __init__(self, title, titleEN, chapters, author = "", cover = "", coverLink = ""):
         self.title = title
         self.titleEN = titleEN
@@ -9,13 +9,7 @@ class Manga:
 
 
 class Chapter:
-    def __init__(self, number, title, pages, size = 0):
+    def __init__(self, number, title, content):
         self.number = number
         self.title = title
-        self.pages = pages
-
-
-class Page:
-    def __init__(self, title, link):
-        self.title = title
-        self.link = link
+        self.content = content

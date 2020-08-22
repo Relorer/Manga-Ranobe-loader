@@ -9,7 +9,7 @@ class MangaPDFCreator:
     def __init__(self, path, manga, sizeLimit=0, fixedHeight=False):
         self.path = path
         self.manga = manga
-        self.mangaTitle = manga.titleEN
+        self.title = manga.titleEN
         self.sizeLimit = sizeLimit
         self.sizeIsLimited = sizeLimit != 0
         self.fixedHeight = fixedHeight
@@ -71,13 +71,13 @@ class MangaPDFCreator:
 
         if len(self.PDFList) == 1:
             file, _ = self.PDFList[0]
-            file.output(self.mangaTitle + ".pdf")
+            file.output(self.title + ".pdf")
         else:
-            if not os.path.exists(self.mangaTitle):
-                os.mkdir(self.mangaTitle)
+            if not os.path.exists(self.title):
+                os.mkdir(self.title)
             for file, rangeChapters in self.PDFList:
                 path = os.path.join(
-                    self.mangaTitle, self.mangaTitle + "_" + rangeChapters + ".pdf")
+                    self.title, self.title + "_" + rangeChapters + ".pdf")
                 file.output(path)
         
         if hasattr(self, "set_saving_progress"):

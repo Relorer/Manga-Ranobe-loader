@@ -1,10 +1,11 @@
 /dist
 /build
-main.spec
 /src/__pycache__
+**.spec
 **.pdf
 **.jpg
 **.png
 **.gif
-.cache
-.log
+**.cache
+**.log
+**.epub

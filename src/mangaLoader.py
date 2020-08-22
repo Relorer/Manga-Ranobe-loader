@@ -3,7 +3,7 @@ import shutil
 import requests
 import time
 from selenium import webdriver
-from Manga import Page
+from MangaEntities import Page
 from PIL import Image
 
 servers = [

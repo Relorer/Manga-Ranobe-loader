@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import re
 import json
 
-from MangaEntities import Manga, Chapter, Page
+from RanobeEntities import Ranobe, Chapter
 
 headers = {
     "user-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36",
@@ -11,7 +11,7 @@ headers = {
 }
 
 
-class MangaParser:
+class RanobeParser:
 
     def __init__(self, url, begin=0, end=0):
         self.url = url
@@ -31,13 +31,13 @@ class MangaParser:
         coverLink, cover = self._parse_cover(soup)
         chapters = self._parse_chapters(soup)
 
-        return Manga(title, self.titleEN, chapters, author, cover, coverLink)
+        return Ranobe(title, self.titleEN, chapters, author, cover, coverLink)
 
     def _parse_title(self, soup):
         title = soup.find("h1", class_="manga-bg__title")
         if title == None:
             title = soup.find("div", class_="manga-title").find("h1")
-        return title.text
+        return title.text.replace("(Новелла)", "").strip()
 
     def _parse_author(self, soup):
         author = soup.find_all(
@@ -51,6 +51,7 @@ class MangaParser:
         return cover, "cover" + cover[cover.rfind("."):cover.rfind("?")]
 
     def _parse_chapters(self, soup):
+        pass
         chapters = []
         chapterBlocks = soup.find_all("div", class_="chapter-item")
         chapterBlocks.reverse()
@@ -63,24 +64,19 @@ class MangaParser:
         countChapters = len(chapterBlocks2)
 
         for index, chapter in enumerate(chapterBlocks2):
-            dataId = chapter.get("data-id")
-            description = requests.get(
-                "https://mangalib.me/download/" + dataId, headers=headers).json()
-            descriptionChapter = description.get("chapter")
-            namesImages = description.get("images")
-            chapterTitle = "Volume %s, chapter %s" % (
-                descriptionChapter["volume"], descriptionChapter["number"])
+            linkComponent = chapter.find("a")
+            link = linkComponent.get("href")
+            title = linkComponent.text
+            title = re.sub("\s+|\n", ' ', title).strip()
 
-            pages = []
-            for i, image in enumerate(namesImages):
-                link = "//manga/%s/chapters/%s/%s" % (
-                    self.titleEN, descriptionChapter["slug"], image)
-                extension = link[link.rfind("."):]
-                title = chapterTitle + "_" + '{:04}'.format(i) + extension
-                pages.append(Page(title, link))
+            html = self._get_html(link)
+            chapterSoup = BeautifulSoup(html, "html.parser")
+            lines = list(
+                map(lambda x: x.text, chapterSoup.select(".reader-container p")))
+            content = "<p>" + "</p><p>".join(lines) + "</p>"
 
-            chapters.append(Chapter(bIndex + index + 1, chapterTitle, pages))
-            
+            chapters.append(Chapter(bIndex + index + 1, title, content))
+
             if hasattr(self, "set_parsing_progress"):
                 self.set_parsing_progress((index + 1) / countChapters)
 

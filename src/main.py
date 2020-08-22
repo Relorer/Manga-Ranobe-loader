@@ -9,6 +9,8 @@ from console_progressbar import ProgressBar
 from MangaPDFCreator import MangaPDFCreator
 from MangaParser import MangaParser
 from MangaLoader import MangaLoader
+from RanobeEpubCreator import RanobeEpubCreator
+from RanobeParser import RanobeParser
 
 
 coloramaInit()
@@ -21,22 +23,15 @@ def main():
             urls = get_urls()
             sleep = put_to_sleep()
 
-            for url, begin, end, fixedHeight, sizeLimit in urls:
+            for typeUrl, url, begin, end, fixedHeight, sizeLimit in urls:
                 print()
                 print(Fore.BLUE + url)
                 print(Style.RESET_ALL, end="")
-                manga = {}
                 try:
-                    manga = parse(url, begin, end)
-                    if len(manga.chapters) == 0:
-                        print(
-                            Fore.RED + "The selected range does not include any chapters")
-                        continue
-                    download(manga)
-                    create(manga, fixedHeight, sizeLimit)
-
-                    shutil.rmtree(downloadPath)
-                    print(Fore.GREEN + "Finished: " + manga.title.strip())
+                    if typeUrl == "manga":
+                        get_manga(url, begin, end, fixedHeight, sizeLimit)
+                    else:
+                        get_ranobe(url, begin, end)
                 except:
                     print()
                     print(Fore.RED + "Invalid link")
@@ -47,10 +42,35 @@ def main():
                 sleep_pc()
 
     except:
-        shutil.rmtree(downloadPath)
+        try:
+            shutil.rmtree(downloadPath)
+        except:
+            pass
 
 
-def parse(url, begin, end):
+def get_manga(url, begin, end, fixedHeight, sizeLimit):
+    manga = parse_manga(url, begin, end)
+    if len(manga.chapters) == 0:
+        print(
+            Fore.RED + "The selected range does not include any chapters")
+        return
+    download_manga(manga)
+    create_manga(manga, fixedHeight, sizeLimit)
+    shutil.rmtree(downloadPath)
+    print(Fore.GREEN + "Finished: " + manga.title.strip())
+
+
+def get_ranobe(url, begin, end):
+    ranobe = parse_ranobe(url, begin, end)
+    if len(ranobe.chapters) == 0:
+        print(
+            Fore.RED + "The selected range does not include any chapters")
+        return
+    create_ranobe(ranobe)
+    print(Fore.GREEN + "Finished: " + ranobe.title.strip())
+
+
+def parse_manga(url, begin, end):
     progressBar = ProgressBar(total=100, prefix='Parsing  ',
                               length=50, fill='X', zfill='-')
 
@@ -61,7 +81,7 @@ def parse(url, begin, end):
     return parser.parse()
 
 
-def download(manga):
+def download_manga(manga):
     progressBar = ProgressBar(total=100, prefix='Loading  ',
                               length=50, fill='X', zfill='-')
 
@@ -85,7 +105,7 @@ def download(manga):
             break
 
 
-def create(manga, fixedHeight, sizeLimit):
+def create_manga(manga, fixedHeight, sizeLimit):
     progressBar = ProgressBar(total=100, prefix='Creating ',
                               length=50, fill='X', zfill='-')
 
@@ -103,6 +123,35 @@ def create(manga, fixedHeight, sizeLimit):
     creator.create()
 
 
+def parse_ranobe(url, begin, end):
+    progressBar = ProgressBar(total=100, prefix='Parsing  ',
+                              length=50, fill='X', zfill='-')
+
+    def setProgress(progress):
+        progressBar.print_progress_bar(progress * 100)
+    parser = RanobeParser(url, begin, end)
+    parser.set_parsing_callback(setProgress)
+    return parser.parse()
+
+
+def create_ranobe(ranobe):
+    progressBar = ProgressBar(total=100, prefix='Creating ',
+                              length=50, fill='X', zfill='-')
+
+    def setProgress(progress):
+        progressBar.print_progress_bar(progress * 100)
+
+    def setSavingProgress(progress):
+        if progress == 0:
+            print("\rSaving...", end="")
+        else:
+            print("\r         \r", end="")
+    creator = RanobeEpubCreator(ranobe)
+    creator.set_creating_callback(setProgress)
+    creator.set_saving_callback(setSavingProgress)
+    creator.create()
+
+
 def sleep_pc():
     for i in range(-10, 0):
         print("\rSleep in " + ((str)(-i)) + " seconds ", end="")
@@ -115,16 +164,22 @@ def get_urls():
     urls = []
     while True:
         print(Style.RESET_ALL, end="")
-        print("Enter a link to the manga: ", end="")
+        print("Enter a link to the manga/ranobe: ", end="")
         url = input()
         if url == "" and len(urls) > 0:
             break
         elif url == "":
             continue
+        if str.find(url, "https://") == -1:
+            url = "https://" + url
         begin, end = get_chapters_range()
-        fixedHeight = fix_height()
-        sizeLimit = get_size_limit()
-        urls.append((url, begin, end, fixedHeight, sizeLimit))
+        if str.find(url, "mangalib") == -1:
+            urls.append(("ranobe", url, begin, end, False, 0))
+        else:
+            fixedHeight = fix_height()
+            sizeLimit = get_size_limit()
+            urls.append(("manga", url, begin, end, fixedHeight, sizeLimit))
+
     return urls
 
 
