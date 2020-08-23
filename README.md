@@ -2,7 +2,7 @@
 
 **Description**
 
-This app is designed to download manga from mangalib.me in pdf format and ranobe from ranobelib.me in epub format.
+This app is designed to download manga from [mangalib.me](https://mangalib.me/ "mangalib") in pdf format and ranobe from [ranobelib.me](https://ranobelib.me/ "ranobelib") in epub format.
 
 **Installation**
 
