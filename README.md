@@ -10,6 +10,5 @@ This app is designed to download manga from mangalib.me in pdf format and ranobe
 - Install requirements: `pip install -r requirements.txt`
 - Run `python main.py`
 
-To get a startup file, you can use the pyinstaller library: `pyinstaller --onefile main.py`
-
+To get a startup file, you can use the pyinstaller library: `pyinstaller --onefile main.py`  
 In this case, make sure that the startup file is located next to chromedriver.exe
