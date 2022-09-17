@@ -1,7 +1,8 @@
 # Manga/Ranobe loader
 > :warning:
 **At the moment, this utility does not work because mangalib uses more modern protection.**<br />
-If you use android you can consider [Tachiyomi](https://tachiyomi.org/ "Tachiyomi")
+If you use android you can consider [Tachiyomi](https://tachiyomi.org/ "Tachiyomi")<br />
+For ranobe, use https://github.com/Relorer/NovelParser
 
 
 **Description**
